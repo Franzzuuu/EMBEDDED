@@ -15,18 +15,18 @@ int period = 0;
 
 void interrupt ISR(void)
 {
-	GIE = 0; 		// disable all unmasked interrupts (INTCON reg) 
-	if(CCP1IF==1) 	// checks CCP1 interrupt flag 
+	GIE = 0; 					// disable all unmasked interrupts (INTCON reg) 
+	if(CCP1IF==1) 				// checks CCP1 interrupt flag 
 	{
-		CCP1IF = 0; // clears interrupt flag
-		TMR1 = 0; 	// resets TMR1 
+		CCP1IF = 0; 			// clears interrupt flag
+		TMR1 = 0; 				// resets TMR1 
 		period = CCPR1/1000; 	// transfers captured TMR1 value
-		// normalize the value (make the number smaller)
-		period = period*8;		 // multiply by the normalized TMR1 timeout
+								// normalize the value (make the number smaller)
+		period = period*8;		// multiply by the normalized TMR1 timeout
 		
 		RA0 = RA0 ^ 1;
 	}
-	GIE = 1; // enable all unmasked interrupts (INTCON reg)
+	GIE = 1; 					// enable all unmasked interrupts (INTCON reg)
 }
 
 void delay (int cnt) {
@@ -63,18 +63,19 @@ void initLCD() {
 	instCtrl(0x0E); // display on, cursor on, blink off
 }	
 
-void dPeriod() {
- 	// convert and store hex values
-    char val[4];				
-    val[3] = ' ';
-    sprintf(val, "%d", period);
-   
-	// display values
-    dataCtrl(val[0]);	
-    dataCtrl(val[1]);
-    dataCtrl(val[2]);
-    dataCtrl('m');
-    dataCtrl('s');
+//display string
+void displayString(const char *str){
+	while (*str) {
+		dataCtrl(*str);
+		delay(1);
+		str++;
+}
+}
+
+void printPeriod() {
+    char val[5];				
+    sprintf(val, "%dms", period);
+    displayString(val);
 }
 
 void main(void)
@@ -83,34 +84,27 @@ void main(void)
 	ADCON1 = 0X06;
 	TRISA = 0x00;
 	RA0 = 0;
-	TRISC = 0x04; 	// set RC2 to input
+	TRISC = 0x04; 		// set RC2 to input
 	PEIE = 1; 		// enable all peripheral interrupt (INTCON reg)
 	GIE = 1; 		// enable all unmasked interrupts (INTCON reg)
-	T1CON = 0x30; 	// 1:8 prescaler, Timer1 off
-	CCP1CON = 0x05; // capture mode: every rising edge
-	CCP1IE = 1; 	// enable TMR1/CCP1 match interrupt (PIE1 reg)
-	CCP1IF = 0; 	// reset interrupt flag (PIR1 reg)
+	T1CON = 0x30; 		// 1:8 prescaler, Timer1 off
+	CCP1CON = 0x05; 	// capture mode: every rising edge
+	CCP1IE = 1; 		// enable TMR1/CCP1 match interrupt (PIE1 reg)
+	CCP1IF = 0; 		// reset interrupt flag (PIR1 reg)
 	TMR1ON = 1;		// Turns on Timer1 (T1CON reg)
 	
 	TRISB = 0x00;
-	TRISD = 0x00;	// sets PORTB as output
+	TRISD = 0x00;		// sets PORTB as output
 	initLCD();		// go to initialize lcd function
 	unsigned char bin, lim;
 	lim = 0x00;
 	
-	// display period
-	dataCtrl('P');
-    dataCtrl('E');
-    dataCtrl('R');
-    dataCtrl('I');
-    dataCtrl('O');
-    dataCtrl('D');
-    dataCtrl(':');
+	displayString("PERIOD:");
 	
-	for(;;) // foreground routine
+	while(1)
 	{
-		instCtrl(0x87);	// reset postion of outputed value
-		dPeriod();		// display period
+		instCtrl(0x87);		// reset postion of outputed value
+		printPeriod();		// display period
 		delay(10);		// short delay
 	}
 }
