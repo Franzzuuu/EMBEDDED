@@ -73,9 +73,9 @@ void displayString(const char *str){
 }
 
 void printPeriod() {
-    char val[5];				
-    sprintf(val, "%dms", period);
-    displayString(val);
+    char periodStr[5];				
+    sprintf(periodStr, "%dms", period);
+    displayString(periodStr);
 }
 
 void main(void)
@@ -84,27 +84,27 @@ void main(void)
 	ADCON1 = 0X06;
 	TRISA = 0x00;
 	RA0 = 0;
-	TRISC = 0x04; 		// set RC2 to input
+	TRISC = 0x04; 	// set RC2 to input
 	PEIE = 1; 		// enable all peripheral interrupt (INTCON reg)
 	GIE = 1; 		// enable all unmasked interrupts (INTCON reg)
-	T1CON = 0x30; 		// 1:8 prescaler, Timer1 off
-	CCP1CON = 0x05; 	// capture mode: every rising edge
-	CCP1IE = 1; 		// enable TMR1/CCP1 match interrupt (PIE1 reg)
-	CCP1IF = 0; 		// reset interrupt flag (PIR1 reg)
+	T1CON = 0x30; 	// 1:8 prescaler, Timer1 off
+	CCP1CON = 0x05; // capture mode: every rising edge
+	CCP1IE = 1; 	// enable TMR1/CCP1 match interrupt (PIE1 reg)
+	CCP1IF = 0; 	// reset interrupt flag (PIR1 reg)
 	TMR1ON = 1;		// Turns on Timer1 (T1CON reg)
 	
 	TRISB = 0x00;
-	TRISD = 0x00;		// sets PORTB as output
+	TRISD = 0x00;	// sets PORTB as output
 	initLCD();		// go to initialize lcd function
 	unsigned char bin, lim;
 	lim = 0x00;
 	
 	displayString("PERIOD:");
 	
-	while(1)
+	while(1) // foreground routine
 	{
-		instCtrl(0x87);		// reset postion of outputed value
+		instCtrl(0x87);	// reset postion of outputed value
 		printPeriod();		// display period
-		delay(10);		// short delay
+		delay(10);
 	}
 }
