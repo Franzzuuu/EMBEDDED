@@ -32,7 +32,7 @@ void interrupt ISR(void)
 }
 	
 void main(void) { 
-	int d_value = 0; 
+	int DVAL = 0; 
 	TRISA = 0xFF; 	// set all PORTA as input
 	TRISB = 0x00; 	// set all PORTB as output 
 	PORTB = 0x00; 	// all LEDs are off 
@@ -48,7 +48,7 @@ void main(void) {
 	delay(1000);
 	GO = 1;
 
-	int d_value=0;
+	int DVAL = 0;
 	int temp1=0;		// for decimal
 	int temp2=0;		// for whole number
 
@@ -56,20 +56,20 @@ void main(void) {
 		if(show) {
 			show = 0;
 			/* read result register */ 
-			d_value = ADRESH; 		// read ADRESH 
-			d_value = d_value << 8; // move to correct position 
-			d_value = d_value | ADRESL; // read ADRESL 			
+			DVAL = ADRESH; 		// read ADRESH 
+			DVAL = DVAL << 8; // move to correct position 
+			DVAL = DVAL | ADRESL; // read ADRESL 			
 			
-			temp2 = round(d_value / 205);			// get ones place (1024/5 = 204.8)
-			temp1 = round((d_value % 205) / 20.48);	// divide the remainder by 20 (204.8/10=20.48)
+			temp2 = round(DVAL / 205);			// get ones place (1024/5 = 204.8)
+			temp1 = round((DVAL % 205) / 20.48);	// divide the remainder by 20 (204.8/10=20.48)
 			if (temp1 == 0x0A) {					// check if decimal = 10 / 0x0A
 				temp1 = 0;							// set to 0
 				temp2++;							// increment to whole number
 			}
 	
 			temp2 = temp2 << 4;			// the decimal is in the lower nibble so whole number must shift left
-			d_value = temp2 | temp1;	// combine values	
-			PORTB = d_value;			// display valyes
+			DVAL = temp2 | temp1;	// combine values	
+			PORTB = DVAL;			// display valyes
 
 			delay(1000);
 			GO = 1; 			// restart A/D Conversion
