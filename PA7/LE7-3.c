@@ -5,14 +5,14 @@
 #include <math.h>
 
 // Configuration bits
-#pragma config FOSC = HS        // Oscillator Selection bits (XT oscillator)
-#pragma config WDTE = OFF       // Watchdog Timer Enable bit (WDT disabled)
-#pragma config PWRTE = ON       // Power-up Timer Enable bit (PWRT enabled)
-#pragma config BOREN = ON       // Brown-out Reset Enable bit (BOR enabled)
-#pragma config LVP = OFF        // Low-Voltage (Single-Supply) In-Circuit Serial Programming Enable bit (RB3 is digital I/O, HV on MCLR must be used for programming)
-#pragma config CPD = OFF        // Data EEPROM Memory Code Protection bit (Data EEPROM code protection off)
-#pragma config WRT = OFF        // Flash Program Memory Write Enable bits (Write protection off; all program memory may be written to by EECON control)
-#pragma config CP = OFF         // Flash Program Memory Code Protection bit (Code protection off)
+#pragma config FOSC = HS       
+#pragma config WDTE = OFF      
+#pragma config PWRTE = ON       
+#pragma config BOREN = ON       
+#pragma config LVP = OFF        
+#pragma config CPD = OFF        
+#pragma config WRT = OFF        
+#pragma config CP = OFF         
 
 #define _XTAL_FREQ 4000000 // 4 MHz
 #define DHT11_Data_Pin PORTDbits.RD5 //input
@@ -32,8 +32,8 @@ void dataCtrl(unsigned char DATA);
 
 // Display Functions
 
-void dispRH();
-void dispT();
+void printRH();
+void printT();
 
 // I2C_master_mode
 void I2C_Wait(void);
@@ -108,18 +108,16 @@ void main(void) {
 		I2C_Stop();
 		delay_ms(200);
 
-		dispRH();
-		dispT();
+		printRH();
+		printT();
 	}
 }
 void delay_ms(int cnt) {
 	int i, j;
-	for (i = cnt; i != 0; i--); // loop until i=0
-	for (j = 0; j < 5000; j++); // loop until j=4999
+	for (i = cnt; i != 0; i--); 
+	for (j = 0; j < 5000; j++); 
 }
 
-
-// function definitions for the LCD
 void instCtrl(unsigned char INST) {
 	PORTB = INST;
 	RD0 = 0;
@@ -142,10 +140,10 @@ void initLCD() {
 	instCtrl(0x06); // entry mode set: increase, display is not shifted
 	instCtrl(0x0E); // display on, cursor off, blink off
 	
-	instCtrl(0x80); // Set Line 1
+	instCtrl(0x80); 
     displayString("Humidity: ");
 	
-	instCtrl(0xC0); // Set Line 2
+	instCtrl(0xC0); 
     displayString("Temperature: ");
 }
 
@@ -157,27 +155,37 @@ void dataCtrl(unsigned char DATA) {
 	RD1 = 0;   
 }
 
-void dispRH() {
+void printRH() {
     instCtrl(0x8A); // set display address
 
     char val[10];
-    sprintf(val, "%d%%", RH);
+    if (RH < 10)
+        sprintf(val, "  %d%%", RH);  // 1-digit: 2 spaces before
+    else if (RH < 100)
+        sprintf(val, " %d%%", RH);   // 2-digit: 1 space before
+    else
+        sprintf(val, "%d%%", RH);    // 3-digit: no space before
     
     int i = 0;
-    while(val[i] != '\0') {
+    while (val[i] != '\0') {
         dataCtrl(val[i]);
         i++;
     }
 }
 
-void dispT() {
+void printT() {
     instCtrl(0xCD); // set display address
 
     char val[10];
-    sprintf(val, "%.1fC", T); 
-    
+    if (T < 10.0)
+        sprintf(val, "  %.1fC", T);  // 1-digit: 2 spaces before
+    else if (T < 100.0)
+        sprintf(val, " %.1fC", T);   // 2-digit: 1 space before
+    else
+        sprintf(val, "%.1fC", T);    // 3-digit: no space before
+
     int i = 0;
-    while(val[i] != '\0') {
+    while (val[i] != '\0') {
         dataCtrl(val[i]);
         i++;
     }
